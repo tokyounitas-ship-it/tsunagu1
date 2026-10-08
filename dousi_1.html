@@ -1,0 +1,49 @@
+<!DOCTYPE html>
+<html lang="ja"><head><meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1, viewport-fit=cover">
+<title>どうし カード</title>
+<style>
+:root{box-sizing:border-box;padding-top:env(safe-area-inset-top,0px);padding-bottom:env(safe-area-inset-bottom,0px);--bg:#f6f4ee;--card:#fff;--ink:#222;--sub:#8a8a8a;--c0:#2f6fed;--c1:#1f9d55;--c2:#d6672d;--line:#ddd8cc}
+@media (prefers-color-scheme:dark){:root:not([data-theme="light"]){--bg:#17181b;--card:#222428;--ink:#f0f0f0;--sub:#9a9a9a;--c0:#6b9bff;--c1:#4cc884;--c2:#ff9a66;--line:#34363b}}
+:root[data-theme="dark"]{--bg:#17181b;--card:#222428;--ink:#f0f0f0;--sub:#9a9a9a;--c0:#6b9bff;--c1:#4cc884;--c2:#ff9a66;--line:#34363b}
+html,body{height:100%}
+*{box-sizing:border-box;-webkit-tap-highlight-color:transparent}
+body{margin:0;background:var(--bg);color:var(--ink);font-family:"Hiragino Sans","Noto Sans JP",system-ui,sans-serif;display:flex;justify-content:center;user-select:none}
+#app{width:100%;max-width:520px;height:100%;display:flex;flex-direction:column;padding:12px 16px 16px}
+.top{display:flex;justify-content:space-between;align-items:center;color:var(--sub);font-size:15px;margin-bottom:8px}
+.top button{border:1px solid var(--line);background:var(--card);color:var(--ink);border-radius:20px;padding:6px 14px;font-size:14px;cursor:pointer}
+.top button.on{background:var(--c0);color:#fff;border-color:var(--c0)}
+.card{flex:1;background:var(--card);border:2px solid var(--line);border-radius:24px;display:flex;flex-direction:column;justify-content:center;align-items:center;padding:20px;text-align:center;cursor:pointer;min-height:0}
+.trail{color:var(--sub);font-size:20px;line-height:1.7;min-height:68px;display:flex;flex-direction:column;justify-content:flex-end;margin-bottom:14px}
+.tag{font-size:20px;font-weight:700;color:#fff;border-radius:24px;padding:6px 20px;margin-bottom:16px}
+.big{font-size:38px;font-weight:800;line-height:1.4;word-break:keep-all}
+.hint{color:var(--sub);font-size:14px;margin-top:22px}
+.dots{display:flex;gap:8px;margin-top:16px}.dots i{width:10px;height:10px;border-radius:50%;background:var(--line)}.dots i.on{background:var(--ink)}
+.bot{display:flex;gap:10px;margin-top:12px}
+.bot button{flex:1;padding:14px;font-size:16px;font-weight:700;border:2px solid var(--line);background:var(--card);color:var(--ink);border-radius:14px;cursor:pointer}
+.bar{height:6px;background:var(--line);border-radius:6px;overflow:hidden;margin-bottom:10px}.bar i{display:block;height:100%;background:var(--c0);transition:width .2s}
+</style></head><body><div id="app"></div>
+<script>
+const L=[["","べんきょうします"],["","かきます"],["","みます"],["","ききます"],["","よみます"],["","かいます"],["（ひとが）","きます"],["","はなします"],["","つくります"],["","とります"],["","かいものします"],["","さんぽします"],["サッカーを　","します"],["ほんを　","よみます"],["えいがを　","みます"],["カードを　","かきます"],["おんがくを　","ききます"],["しゃしんを　","とります"],["かいしゃへ　","いきます"],["","かえります"],["","おきます"],["","ねます"],["ばんごはんを　","たべます"],["","たべます"],["","します"],["テレビを　","みます"],["しんぶんを　","よみます"],["","せんたくします"],["","でかけます"]];
+const NAMES=['ます','ました','ませんでした'],COL=['var(--c0)','var(--c1)','var(--c2)'];
+let order,vi=0,step=0,shuffled=false;
+const sh=a=>{a=a.slice();for(let i=a.length-1;i>0;i--){const j=Math.random()*(i+1)|0;[a[i],a[j]]=[a[j],a[i]]}return a};
+function setOrder(){order=shuffled?sh(L.map((_,i)=>i)):L.map((_,i)=>i);vi=0;step=0}
+function forms(i){const [p,v]=L[i],s=v.slice(0,-2);return[p+v,p+s+'ました',p+s+'ませんでした']}
+function render(){
+  const f=forms(order[vi]);
+  document.getElementById('app').innerHTML=
+  '<div class="top"><span>'+(vi+1)+' / '+order.length+'</span><button class="'+(shuffled?'on':'')+'" onclick="toggleShuffle()">🔀 シャッフル</button></div>'+
+  '<div class="bar"><i style="width:'+((vi+1)/order.length*100)+'%"></i></div>'+
+  '<div class="card" onclick="next()"><div class="trail">'+f.slice(0,step).map(x=>'<div>'+x+'</div>').join('')+'</div>'+
+  '<div class="tag" style="background:'+COL[step]+'">'+NAMES[step]+(step<2?'　→　'+NAMES[step+1]:'')+'</div><div class="big">'+f[step]+'</div>'+
+  '<div class="dots">'+[0,1,2].map(i=>'<i class="'+(i<=step?'on':'')+'"></i>').join('')+'</div><div class="hint">タップして つぎへ</div></div>'+
+  '<div class="bot"><button onclick="prev()">‹ もどる</button><button onclick="skip()">つぎの どうし ›</button></div>';
+}
+function next(){if(step<2)step++;else{step=0;vi=(vi+1)%order.length;if(vi===0&&shuffled)setOrder()}render()}
+function prev(){if(step>0)step--;else{vi=(vi-1+order.length)%order.length;step=2}render()}
+function skip(){step=0;vi=(vi+1)%order.length;render()}
+function toggleShuffle(){shuffled=!shuffled;setOrder();render()}
+document.addEventListener('keydown',e=>{if(e.key===' '||e.key==='ArrowRight'){e.preventDefault();next()}else if(e.key==='ArrowLeft')prev()});
+setOrder();render();
+</script></body></html>
